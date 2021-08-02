@@ -8,11 +8,14 @@
     <link rel="stylesheet" href="./index.css" />
   </head>
   <body>
-    <input
-      id="search"
-      type="input"
-      placeholder="검색하고 싶은 사용자의 아이디를 입력해주세요"
-    />
+    <div class="autocomplete">
+      <input
+        id="search"
+        type="input"
+        placeholder="검색하고 싶은 사용자의 아이디를 입력해주세요"
+      />
+      <ul id="suggestLayer"></ul>
+    </div>
     <script src="./index.js"></script>
   </body>
 </html>
