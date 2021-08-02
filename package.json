@@ -19,5 +19,8 @@
   "homepage": "https://github.com/yoophi/rxjs-github-search#readme",
   "devDependencies": {
     "parcel": "*"
+  },
+  "dependencies": {
+    "rxjs": "^7.3.0"
   }
 }
