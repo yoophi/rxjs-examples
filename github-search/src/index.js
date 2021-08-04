@@ -9,10 +9,15 @@ import {
   tap,
 } from "rxjs/operators";
 
-const user$ = fromEvent(document.getElementById("search"), "keyup").pipe(
+const $layer = document.getElementById("suggestLayer");
+
+const keyup$ = fromEvent(document.getElementById("search"), "keyup").pipe(
   debounceTime(300),
   map((event) => event.target.value),
-  distinctUntilChanged(),
+  distinctUntilChanged()
+);
+
+const user$ = keyup$.pipe(
   filter((query) => query.trim().length > 0),
   tap(showLoading),
   mergeMap((query) =>
@@ -21,11 +26,13 @@ const user$ = fromEvent(document.getElementById("search"), "keyup").pipe(
   tap(hideLoading)
 );
 
-user$.subscribe((value) => {
-  console.log("서버로부터 받은 검색 결과", value);
-});
+const reset$ = keyup$.pipe(
+  filter((query) => query.trim().length === 0),
+  tap((v) => ($layer.innerHTML = ""))
+);
 
-const $layer = document.getElementById("suggestLayer");
+user$.subscribe();
+reset$.subscribe();
 
 function drawLayer(items) {
   $layer.innerHTML = items
