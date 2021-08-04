@@ -32,3 +32,11 @@
   margin: 0;
   padding: 0;
 }
+
+#loading {
+  position: absolute;
+  z-index: 2;
+  top: 2px;
+  right: 0;
+  display: none;
+}

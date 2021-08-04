@@ -1,11 +1,12 @@
 import { fromEvent } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
   map,
   mergeMap,
-  debounceTime,
-  filter,
-  distinctUntilChanged,
+  tap,
 } from "rxjs/operators";
 
 const user$ = fromEvent(document.getElementById("search"), "keyup").pipe(
@@ -13,9 +14,11 @@ const user$ = fromEvent(document.getElementById("search"), "keyup").pipe(
   map((event) => event.target.value),
   distinctUntilChanged(),
   filter((query) => query.trim().length > 0),
+  tap(showLoading),
   mergeMap((query) =>
     ajax.getJSON(`https://api.github.com/search/users?q=${query}`)
-  )
+  ),
+  tap(hideLoading)
 );
 
 user$.subscribe((value) => {
@@ -38,3 +41,13 @@ function drawLayer(items) {
 }
 
 user$.subscribe((v) => drawLayer(v.items));
+
+const $loading = document.getElementById("loading");
+
+function showLoading() {
+  $loading.style.display = "block";
+}
+
+function hideLoading() {
+  $loading.style.display = "none";
+}
