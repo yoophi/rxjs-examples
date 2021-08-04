@@ -4,8 +4,8 @@ import {
   debounceTime,
   distinctUntilChanged,
   map,
-  mergeMap,
   partition,
+  switchMap,
   tap,
 } from "rxjs/operators";
 
@@ -23,7 +23,7 @@ let [user$, reset$] = keyup$.pipe(
 
 user$ = user$.pipe(
   tap(showLoading),
-  mergeMap((query) =>
+  switchMap((query) =>
     ajax.getJSON(`https://api.github.com/search/users?q=${query}`)
   ),
   tap(hideLoading)
