@@ -1,32 +1,48 @@
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
+import { fromEvent } from "rxjs";
+import { ajax } from "rxjs/ajax";
 import {
   debounceTime,
   distinctUntilChanged,
-  filter,
-  fromEvent,
   map,
   mergeMap,
-} from "rxjs";
-import { ajax } from "rxjs/ajax";
+  partition,
+  tap,
+} from "rxjs/operators";
 import { SearchInput } from "./SearchInput";
 import { UserProfile } from "./UserProfile";
 
 export const App = () => {
   const inputRef = useRef();
-  const [usersData, setUsersData] = useState([]);
+  const [usersData, setUsersData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const user$ = fromEvent(inputRef.current, "keyup").pipe(
+    const keyup$ = fromEvent(inputRef.current, "keyup").pipe(
       debounceTime(300),
       map((event) => event.target.value),
-      distinctUntilChanged(),
-      filter((query) => query.trim().length > 0),
+      distinctUntilChanged()
+    );
+    let [user$, reset$] = keyup$.pipe(
+      partition((query) => query.trim().length > 0)
+    );
+    user$ = user$.pipe(
+      tap(() => {
+        setIsLoading(true);
+      }),
       mergeMap((query) =>
         ajax.getJSON(`https://api.github.com/search/users?q=${query}`)
-      )
+      ),
+      tap(() => {
+        setIsLoading(false);
+      })
     );
     user$.subscribe((value) => setUsersData(value));
-  }, [inputRef]);
+    reset$ = reset$.pipe(tap(() => setUsersData({})));
+    reset$.subscribe();
+  }, [inputRef, setIsLoading, setUsersData]);
 
   return (
     <div className="autocomplete">
@@ -38,6 +54,9 @@ export const App = () => {
           ))}
         </ul>
       )}
+      <div id="loading" style={{ display: isLoading ? "block" : "none" }}>
+        <FontAwesomeIcon icon={faSpinner} />
+      </div>
     </div>
   );
 };
