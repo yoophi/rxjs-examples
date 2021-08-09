@@ -22,6 +22,13 @@ const start$ = fromEvent(window, EVENTS.start).pipe(toPos);
 const move$ = fromEvent(window, EVENTS.move).pipe(toPos);
 const end$ = fromEvent(window, EVENTS.end);
 
-const drag$ = start$.pipe(switchMap((start) => move$.pipe(takeUntil(end$))));
+const drag$ = start$.pipe(
+  switchMap((start) =>
+    move$.pipe(
+      map((move) => move - start),
+      takeUntil(end$)
+    )
+  )
+);
 
 drag$.subscribe((e) => console.log(e));
