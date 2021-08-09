@@ -1,6 +1,6 @@
-const $view = document.getElementById('carousel')
-const $container = $view.querySelector('.container')
-const PANEL_COUNT = $container.querySelectorAll('.panel').length;
+const $view = document.getElementById("carousel");
+const $container = $view.querySelector(".container");
+const PANEL_COUNT = $container.querySelectorAll(".panel").length;
 
 const SUPPORT_TOUCH = "ontouchstart" in window;
 const EVENTS = {
@@ -10,11 +10,12 @@ const EVENTS = {
 };
 
 import { fromEvent } from "rxjs";
+import { switchMap, takeUntil } from "rxjs/operators";
 
 const start$ = fromEvent(window, EVENTS.start);
 const move$ = fromEvent(window, EVENTS.move);
 const end$ = fromEvent(window, EVENTS.end);
 
-start$.subscribe(() => console.log("start"));
-move$.subscribe(() => console.log("move"));
-end$.subscribe(() => console.log("end"));
+const drag$ = start$.pipe(switchMap((start) => move$.pipe(takeUntil(end$))));
+
+drag$.subscribe((e) => console.log(e));
