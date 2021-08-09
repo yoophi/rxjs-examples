@@ -10,10 +10,16 @@ const EVENTS = {
 };
 
 import { fromEvent } from "rxjs";
-import { switchMap, takeUntil } from "rxjs/operators";
+import { map, switchMap, takeUntil } from "rxjs/operators";
 
-const start$ = fromEvent(window, EVENTS.start);
-const move$ = fromEvent(window, EVENTS.move);
+function toPos(obs$) {
+  return obs$.pipe(
+    map((v) => (SUPPORT_TOUCH ? v.changedTouches[0].pageX : v.pageX))
+  );
+}
+
+const start$ = fromEvent(window, EVENTS.start).pipe(toPos);
+const move$ = fromEvent(window, EVENTS.move).pipe(toPos);
 const end$ = fromEvent(window, EVENTS.end);
 
 const drag$ = start$.pipe(switchMap((start) => move$.pipe(takeUntil(end$))));
