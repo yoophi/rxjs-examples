@@ -10,7 +10,7 @@ const EVENTS = {
 };
 
 import { fromEvent } from "rxjs";
-import { first, map, startWith, switchMap, takeUntil } from "rxjs/operators";
+import { first, map, startWith, switchMap, takeUntil, withLatestFrom } from "rxjs/operators";
 
 function toPos(obs$) {
   return obs$.pipe(
@@ -21,7 +21,10 @@ function toPos(obs$) {
 const start$ = fromEvent(window, EVENTS.start).pipe(toPos);
 const move$ = fromEvent(window, EVENTS.move).pipe(toPos);
 const end$ = fromEvent(window, EVENTS.end);
-
+const size$ = fromEvent(window, "resize").pipe(
+  startWith(0),
+  map((event) => $view.clientWidth)
+);
 const drag$ = start$.pipe(
   switchMap((start) =>
     move$.pipe(
@@ -36,11 +39,8 @@ const drop$ = drag$.pipe(
       map((event) => drag),
       first()
     )
-  )
-);
-const size$ = fromEvent(window, "resize").pipe(
-  startWith(0),
-  map((event) => $view.clientWidth)
+  ),
+  withLatestFrom(size$),
 );
 
 drag$.subscribe((e) => console.log(e));
