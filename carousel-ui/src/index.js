@@ -30,7 +30,14 @@ const drag$ = start$.pipe(
     )
   )
 );
-const drop$ = drag$.pipe(switchMap((drag) => end$.pipe(first())));
+const drop$ = drag$.pipe(
+  switchMap((drag) =>
+    end$.pipe(
+      map((event) => drag),
+      first()
+    )
+  )
+);
 const size$ = fromEvent(window, "resize").pipe(
   startWith(0),
   map((event) => $view.clientWidth)
@@ -39,4 +46,4 @@ const size$ = fromEvent(window, "resize").pipe(
 drag$.subscribe((e) => console.log(e));
 drop$.subscribe((e) => console.log(e));
 
-size$.subscribe(console.log)
+size$.subscribe(console.log);
