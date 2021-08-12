@@ -2,6 +2,7 @@ const $view = document.getElementById("carousel");
 const $container = $view.querySelector(".container");
 const PANEL_COUNT = $container.querySelectorAll(".panel").length;
 
+const THRESHOLD = 30;
 const SUPPORT_TOUCH = "ontouchstart" in window;
 const EVENTS = {
   start: SUPPORT_TOUCH ? "touchstart" : "mousedown",
@@ -13,10 +14,10 @@ import { fromEvent, merge } from "rxjs";
 import {
   first,
   map,
+  scan,
   share,
   startWith,
   switchMap,
-  tap,
   takeUntil,
   withLatestFrom,
 } from "rxjs/operators";
@@ -56,5 +57,50 @@ const drop$ = drag$.pipe(
   })
 );
 
-const carousel$ = merge(drag$, drop$);
-carousel$.subscribe((v) => console.log("carousel", v));
+const carousel$ = merge(drag$, drop$).pipe(
+  scan(
+    (store, { distance, size }) => {
+      // const updateStore = {
+      //   from: store.index * -store.size + distance,
+      // };
+      // if (size === undefined) {
+      //   updateStore.to = updateStore.from;
+      // } else {
+      // }
+      // return { ...store, ...updateStore };
+      const updateStore = {
+        from: -(store.index * store.size) + distance,
+      };
+
+      if (size === undefined) {
+        updateStore.to = updateStore.from;
+      } else {
+        let tobeIndex = store.index;
+        if (Math.abs(distance) >= THRESHOLD) {
+          tobeIndex =
+            distance < 0
+              ? Math.min(tobeIndex + 1, PANEL_COUNT - 1)
+              : Math.max(tobeIndex - 1, 0);
+        }
+        updateStore.index = tobeIndex;
+        updateStore.to = -(tobeIndex * size);
+        updateStore.size = size;
+      }
+      return { ...store, ...updateStore };
+    },
+    {
+      from: 0,
+      to: 0,
+      index: 0,
+      size: 0,
+    }
+  )
+);
+
+function translateX(posX) {
+  $container.style.transform = `translate3d(${posX}px, 0, 0)`;
+}
+carousel$.subscribe((store) => {
+  console.log("carousel", store);
+  translateX(store.to);
+});
