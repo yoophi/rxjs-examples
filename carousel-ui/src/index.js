@@ -9,7 +9,7 @@ const EVENTS = {
   end: SUPPORT_TOUCH ? "touchend" : "mouseup",
 };
 
-import { fromEvent } from "rxjs";
+import { fromEvent, merge } from "rxjs";
 import {
   first,
   map,
@@ -53,4 +53,5 @@ const drop$ = drag$.pipe(
   withLatestFrom(size$)
 );
 
-size$.subscribe(console.log);
+const carousel$ = merge(drag$, drop$);
+carousel$.subscribe((v) => console.log("carousel", v));
