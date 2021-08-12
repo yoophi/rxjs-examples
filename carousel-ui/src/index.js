@@ -41,7 +41,8 @@ const drag$ = start$.pipe(
       takeUntil(end$)
     )
   ),
-  share()
+  share(),
+  map((distance) => ({ distance }))
 );
 const drop$ = drag$.pipe(
   switchMap((drag) =>
@@ -50,7 +51,9 @@ const drop$ = drag$.pipe(
       first()
     )
   ),
-  withLatestFrom(size$)
+  withLatestFrom(size$, (drag, size) => {
+    return { ...drag, size };
+  })
 );
 
 const carousel$ = merge(drag$, drop$);
