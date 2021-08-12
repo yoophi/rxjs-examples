@@ -10,7 +10,16 @@ const EVENTS = {
 };
 
 import { fromEvent } from "rxjs";
-import { first, map, startWith, switchMap, takeUntil, withLatestFrom } from "rxjs/operators";
+import {
+  first,
+  map,
+  share,
+  startWith,
+  switchMap,
+  tap,
+  takeUntil,
+  withLatestFrom,
+} from "rxjs/operators";
 
 function toPos(obs$) {
   return obs$.pipe(
@@ -31,7 +40,8 @@ const drag$ = start$.pipe(
       map((move) => move - start),
       takeUntil(end$)
     )
-  )
+  ),
+  share()
 );
 const drop$ = drag$.pipe(
   switchMap((drag) =>
@@ -40,10 +50,7 @@ const drop$ = drag$.pipe(
       first()
     )
   ),
-  withLatestFrom(size$),
+  withLatestFrom(size$)
 );
-
-drag$.subscribe((e) => console.log(e));
-drop$.subscribe((e) => console.log(e));
 
 size$.subscribe(console.log);
