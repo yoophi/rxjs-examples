@@ -3,6 +3,7 @@ const $container = $view.querySelector(".container");
 const PANEL_COUNT = $container.querySelectorAll(".panel").length;
 
 const THRESHOLD = 30;
+const DEFAULT_DURATION = 300;
 const SUPPORT_TOUCH = "ontouchstart" in window;
 const EVENTS = {
   start: SUPPORT_TOUCH ? "touchstart" : "mousedown",
@@ -10,15 +11,25 @@ const EVENTS = {
   end: SUPPORT_TOUCH ? "touchend" : "mouseup",
 };
 
-import { fromEvent, merge } from "rxjs";
+import {
+  concat,
+  defer,
+  fromEvent,
+  merge,
+  animationFrameScheduler,
+  interval,
+  of,
+} from "rxjs";
 import {
   first,
   map,
+  mergeAll,
   scan,
   share,
   startWith,
   switchMap,
   takeUntil,
+  takeWhile,
   withLatestFrom,
 } from "rxjs/operators";
 
@@ -60,14 +71,6 @@ const drop$ = drag$.pipe(
 const carousel$ = merge(drag$, drop$).pipe(
   scan(
     (store, { distance, size }) => {
-      // const updateStore = {
-      //   from: store.index * -store.size + distance,
-      // };
-      // if (size === undefined) {
-      //   updateStore.to = updateStore.from;
-      // } else {
-      // }
-      // return { ...store, ...updateStore };
       const updateStore = {
         from: -(store.index * store.size) + distance,
       };
@@ -94,13 +97,30 @@ const carousel$ = merge(drag$, drop$).pipe(
       index: 0,
       size: 0,
     }
+  ),
+  switchMap(({ from, to }) =>
+    from === to ? of(to) : animation(from, to, DEFAULT_DURATION)
   )
 );
 
 function translateX(posX) {
   $container.style.transform = `translate3d(${posX}px, 0, 0)`;
 }
-carousel$.subscribe((store) => {
-  console.log("carousel", store);
-  translateX(store.to);
+carousel$.subscribe((pos) => {
+  console.log("carousel", pos);
+  translateX(pos);
 });
+
+function animation(from, to, duration) {
+  return defer(() => {
+    const scheduler = animationFrameScheduler;
+    const start = scheduler.now();
+    const interval$ = interval(0, scheduler).pipe(
+      map(() => (scheduler.now() - start) / duration),
+      takeWhile((rate) => rate < 1)
+    );
+    return concat(interval$, of(1)).pipe(
+      map((rate) => from + (to - from) * rate)
+    );
+  });
+}
