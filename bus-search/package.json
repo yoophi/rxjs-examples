@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --inspect api-server.js",
+    "build:dev": "parcel src/index.html",
+    "dev": "concurrently --kill-others \"npm run build:dev\" \"npm run start\""
   },
   "keywords": [],
   "author": "",
@@ -16,6 +19,8 @@
     "xml2json-light": "^1.0.6"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12"
+    "concurrently": "^6.2.1",
+    "nodemon": "^2.0.12",
+    "parcel": "*"
   }
 }

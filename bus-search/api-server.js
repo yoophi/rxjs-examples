@@ -15,7 +15,7 @@ const { switchMap, map, take } = require("rxjs/operators");
  */
 const SERVICE_KEY = process.env.SERVICE_KEY;
 
-app.use(express.static("./"));
+app.use(express.static("./dist"));
 
 function createRemote$(url) {
   return from(fetch(url)).pipe(
