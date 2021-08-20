@@ -10,6 +10,31 @@ function createNaverMap($map) {
   });
 }
 
+export function hadnleAjax(prop) {
+  return (obs$) =>
+    obs$.pipe(
+      map((jsonRes) => {
+        if (jsonRes.error) {
+          if (jsonRes.error.code === "4") {
+            return [];
+          } else {
+            throw jsonRes.error;
+          }
+        } else {
+          if (Array.isArray(jsonRes[prop])) {
+            return jsonRes[prop];
+          } else {
+            if (jsonRes[prop]) {
+              return [jsonRes[prop]];
+            } else {
+              return [];
+            }
+          }
+        }
+      })
+    );
+}
+
 export default class Map {
   constructor($map) {
     this.naverMap = createNaverMap($map);
@@ -32,7 +57,8 @@ export default class Map {
     return coord$.pipe(
       switchMap((coord) =>
         ajax.getJSON(`/station/around/${coord.longitude}/${coord.latitude}`)
-      )
+      ),
+      hadnleAjax("busStationAroundList")
     );
   }
 }
