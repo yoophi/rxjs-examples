@@ -1,6 +1,7 @@
-import { combineLatest, of, fromEvent } from "rxjs";
+import { combineLatest, fromEvent, of } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { map, mergeMap, switchMap } from "rxjs/operators";
+import { handleAjax } from "./common";
 
 function createNaverMap($map) {
   return new naver.maps.Map($map, {
@@ -22,31 +23,6 @@ function getBuesType(name) {
   } else {
     return "";
   }
-}
-
-export function handleAjax(prop) {
-  return (obs$) =>
-    obs$.pipe(
-      map((jsonRes) => {
-        if (jsonRes.error) {
-          if (jsonRes.error.code === "4") {
-            return [];
-          } else {
-            throw jsonRes.error;
-          }
-        } else {
-          if (Array.isArray(jsonRes[prop])) {
-            return jsonRes[prop];
-          } else {
-            if (jsonRes[prop]) {
-              return [jsonRes[prop]];
-            } else {
-              return [];
-            }
-          }
-        }
-      })
-    );
 }
 
 export default class Map {
