@@ -4,6 +4,11 @@ const app = express();
 const x2j = require("xml2json-light");
 const { from, throwError } = require("rxjs");
 const { switchMap, map, take } = require("rxjs/operators");
+const Bundler = require("parcel-bundler");
+
+const file = "src/index.html"; // 엔트리 포인트로 쓰일 절대경로를 적습니다
+const options = {}; // 가능한 옵션은 API 문서를 참조하세요
+const bundler = new Bundler(file, options);
 
 /*
  * 공공데이터포털 인증키
@@ -14,8 +19,6 @@ const { switchMap, map, take } = require("rxjs/operators");
  *  - [버스노선 조회 (경기도)](https://www.data.go.kr/dataset/15000430/openapi.do)
  */
 const SERVICE_KEY = process.env.SERVICE_KEY;
-
-app.use(express.static("./dist"));
 
 function createRemote$(url) {
   return from(fetch(url)).pipe(
@@ -85,6 +88,8 @@ Object.keys(routes).forEach((path) => {
     ).subscribe((data) => res.json(data));
   });
 });
+
+app.use(bundler.middleware());
 
 app.listen(3000, function () {
   console.log("Server listening on port 3000!");

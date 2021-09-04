@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --inspect api-server.js",
-    "build:dev": "parcel src/index.html",
-    "dev": "concurrently --kill-others \"npm run build:dev\" \"npm run start\""
+    "dev": "node app.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +19,7 @@
   "devDependencies": {
     "concurrently": "^6.2.1",
     "nodemon": "^2.0.12",
-    "parcel": "*"
+    "parcel": "*",
+    "parcel-bundler": "^1.12.5"
   }
 }
